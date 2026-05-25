@@ -20,10 +20,22 @@ function RightWorkspace({
     consoleOpen, setConsoleOpen, activeConsoleTab, setActiveConsoleTab
 }) {
 
+    // Helper for Submission Results (from DB)
     const getStatusColor = (status) => {
         if (status === "Accepted") return "text-emerald-400";
         if (status === "Pending" || status === "Processing") return "text-yellow-400";
+        if (status === "Time Limit Exceeded") return "text-orange-400";
         return "text-red-400";
+    };
+
+    // Mapping Judge0 IDs explicitly to UI styles
+    const getRunStatusUI = (id) => {
+        if (id === 3) return { label: "Accepted", text: "text-emerald-400", bg: "bg-emerald-400/5", border: "border-emerald-400/20" };
+        if (id === 4) return { label: "Wrong Answer", text: "text-red-400", bg: "bg-red-400/5", border: "border-red-400/20" };
+        if (id === 5) return { label: "Time Limit Exceeded", text: "text-rose-500", bg: "bg-rose-500/5", border: "border-rose-500/20" };
+        if (id === 6) return { label: "Compilation Error", text: "text-yellow-400", bg: "bg-yellow-400/5", border: "border-yellow-400/20" };
+        if (id >= 7 && id <= 12) return { label: "Runtime Error", text: "text-rose-500", bg: "bg-rose-500/5", border: "border-rose-500/20" };
+        return { label: "Internal Error", text: "text-zinc-400", bg: "bg-zinc-400/5", border: "border-zinc-400/20" };
     };
 
     return (
@@ -117,25 +129,30 @@ function RightWorkspace({
 
                         {activeConsoleTab === "result" && (
                             <div>
+                                {/* RUN CODE RESULTS */}
                                 {runResult && !submitResult && (
                                     <div className="space-y-4">
                                         <h3 className="text-lg font-bold text-white mb-2 border-b border-white/10 pb-2">Run Code Results</h3>
                                         {runResult.map((res, i) => {
+                                            const uiStatus = getRunStatusUI(res.status.id);
                                             const isAccepted = res.status.id === 3;
+                                            
                                             return (
-                                                <div key={i} className={`p-4 rounded-xl border ${isAccepted ? 'bg-emerald-400/5 border-emerald-400/20' : 'bg-red-400/5 border-red-400/20'}`}>
+                                                <div key={i} className={`p-4 rounded-xl border ${uiStatus.bg} ${uiStatus.border}`}>
                                                     <div className="flex justify-between items-center mb-2">
-                                                        <span className={`font-semibold ${isAccepted ? 'text-emerald-400' : 'text-red-400'}`}>
-                                                            Test Case {i + 1}: {res.status.description}
+                                                        <span className={`font-semibold ${uiStatus.text}`}>
+                                                            Test Case {i + 1}: {uiStatus.label}
                                                         </span>
                                                         <span className="text-xs text-zinc-500">{res.time}s • {res.memory} KB</span>
                                                     </div>
+                                                    
+                                                    {/* Output details for anything that failed */}
                                                     {!isAccepted && (
                                                         <div className="mt-2 space-y-2 text-sm">
                                                             {res.expected_output && <div><span className="text-zinc-500 text-xs">Expected:</span> <pre className="text-zinc-300 bg-black/40 p-1.5 rounded">{res.expected_output}</pre></div>}
-                                                            {res.stdout && <div><span className="text-zinc-500 text-xs">Output:</span> <pre className="text-red-300 bg-red-400/10 p-1.5 rounded">{res.stdout}</pre></div>}
-                                                            {res.compile_output && <div><span className="text-zinc-500 text-xs">Compile Error:</span> <pre className="text-red-300 bg-red-400/10 p-1.5 rounded">{res.compile_output}</pre></div>}
-                                                            {res.stderr && <div><span className="text-zinc-500 text-xs">Error:</span> <pre className="text-red-300 bg-red-400/10 p-1.5 rounded">{res.stderr}</pre></div>}
+                                                            {res.stdout && <div><span className="text-zinc-500 text-xs">Output:</span> <pre className={`${uiStatus.text} bg-black/40 p-1.5 rounded`}>{res.stdout}</pre></div>}
+                                                            {res.compile_output && <div><span className="text-zinc-500 text-xs">Compile Error:</span> <pre className={`${uiStatus.text} bg-black/40 p-1.5 rounded`}>{res.compile_output}</pre></div>}
+                                                            {res.stderr && <div><span className="text-zinc-500 text-xs">Error:</span> <pre className={`${uiStatus.text} bg-black/40 p-1.5 rounded`}>{res.stderr}</pre></div>}
                                                         </div>
                                                     )}
                                                 </div>
@@ -144,6 +161,7 @@ function RightWorkspace({
                                     </div>
                                 )}
 
+                                {/* SUBMIT CODE RESULTS */}
                                 {submitResult && (
                                     <div className="py-4">
                                         <h2 className={`text-2xl font-bold mb-2 ${getStatusColor(submitResult.status)}`}>{submitResult.status}</h2>
