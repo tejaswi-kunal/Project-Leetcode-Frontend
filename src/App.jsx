@@ -6,6 +6,7 @@ import { useDispatch,useSelector } from "react-redux";
 import { useEffect } from "react";
 import { checkUser } from "./redux/authSlice";
 import Problem from "./pages/Problem"; 
+import ProblemSubmit from "./pages/ProblemSubmit";
 
 
 function App()
@@ -32,6 +33,7 @@ function App()
       <Route path="/signup" element={isAuthenticated?<Navigate to={'/'}/>:<SignUp></SignUp>}></Route>
       <Route path="/login" element={isAuthenticated?<Navigate to={'/'}/>:<Login></Login>}></Route>
       <Route path="/problems" element={!isAuthenticated?<Navigate to={'/login'}/>:<Problem></Problem>} ></Route>
+      <Route path="/problem/:id" element={!isAuthenticated?<Navigate to={'/login'}/>:<ProblemSubmit></ProblemSubmit>} ></Route>
     </Routes>
   )
 }

@@ -22,13 +22,17 @@ const LogoutIcon = () => (
 );
 
 function Header() {
+    // to check if the dropdown menu is oprn or not 
     const [dropdownOpen, setDropdownOpen] = useState(false);
+
+    // to store the ref of DOM element->dropdown menue ,and use it directly to access the properties of the 
+    // dom element 
     const dropdownRef = useRef(null);
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { loading, user } = useSelector((state) => state.authSlice);
     
-    // Close dropdown on outside click
+    // Close dropdown on outside click using dropdown refrence stored in dropdownRef
     useEffect(() => {
         const handleOutside = (e) => {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target))
@@ -75,6 +79,7 @@ function Header() {
                         <span className="text-zinc-400 text-xs">0 streak</span>
                     </div>
                     
+                    {/* maintaining the dropdown menu */}
                     <div className="relative" ref={dropdownRef}>
                         <button
                             onClick={() => setDropdownOpen(v => !v)}
@@ -97,10 +102,14 @@ function Header() {
                                 bg-[#111] border border-white/[0.08]
                                 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.8)]
                                 overflow-hidden z-50">
+                                {/* maintaining the username and the emailid */}
                                 <div className="px-4 py-3 border-b border-white/[0.06]">
+                                    {/* this is the one which we have to change to button see the profile page */}
                                     <p className="text-white text-sm font-medium truncate">{user?.userName || "User"}</p>
                                     <p className="text-zinc-600 text-xs mt-0.5 truncate">{user?.emailId || ""}</p>
                                 </div>
+
+                                {/* maintaining the logout */}
                                 <div className="p-1.5">
                                     <button
                                         onClick={() => { setDropdownOpen(false); dispatch(logoutUser()); }}
