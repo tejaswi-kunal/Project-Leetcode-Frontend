@@ -13,9 +13,13 @@ import Profile from "./pages/Profile";
 import EditProfile from "./pages/Settings/EditProfile";
 import ChangePassword from "./pages/Settings/ChangePassword";
 
-// NEW IMPORTS
 import Leaderboard from "./pages/Leaderboard";
 import PublicProfile from "./pages/PublicProfile";
+
+// NEW CONTEST IMPORTS
+import ContestHub from "./pages/ContestHub";
+import ContestWorkspace from "./pages/ContestWorkspace";
+import ContestLeaderboard from "./pages/ContestLeaderboard";
 
 function App() {
   const { isAuthenticated, loading } = useSelector((state) => state.authSlice);
@@ -27,7 +31,7 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#080808] flex items-center justify-center">
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <span className="loading loading-spinner loading-lg text-[#C9963A]"></span>
       </div>
     );
@@ -35,7 +39,7 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={isAuthenticated ? <Homepage /> : <Navigate to={'/login'} />} />
+      <Route path="/" element={<Homepage />} />
       <Route path="/signup" element={isAuthenticated ? <Navigate to={'/'} /> : <SignUp />} />
       <Route path="/login" element={isAuthenticated ? <Navigate to={'/'} /> : <Login />} />
       
@@ -46,10 +50,13 @@ function App() {
       <Route path="/settings/edit-profile" element={!isAuthenticated ? <Navigate to={'/login'} /> : <EditProfile />} />
       <Route path="/settings/change-password" element={!isAuthenticated ? <Navigate to={'/login'} /> : <ChangePassword />} />
 
-      {/* NEW ROUTES */}
       <Route path="/leaderboard" element={!isAuthenticated ? <Navigate to={'/login'} /> : <Leaderboard />} />
-      {/* Public profile route using URL parameter */}
       <Route path="/profile/:id" element={!isAuthenticated ? <Navigate to={'/login'} /> : <PublicProfile />} />
+
+      {/* THE FIX: Changed from "/contests" to "/contest" */}
+      <Route path="/contest" element={!isAuthenticated ? <Navigate to={'/login'} /> : <ContestHub />} />
+      <Route path="/contest/:id/arena" element={!isAuthenticated ? <Navigate to={'/login'} /> : <ContestWorkspace />} />
+      <Route path="/contest/:id/leaderboard" element={!isAuthenticated ? <Navigate to={'/login'} /> : <ContestLeaderboard />} />
     </Routes>
   );
 }

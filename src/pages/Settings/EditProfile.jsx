@@ -8,9 +8,9 @@ import Header from "../../components/Header";
 import axiosClient from "../../utils/axiosClient";
 import { checkUser } from "../../redux/authSlice";
 import { motion } from "framer-motion";
-import { User, Image as ImageIcon, Link as LinkIcon, BookOpen, ShieldAlert, CheckCircle2, AlertCircle } from "lucide-react";
+import { User, Image as ImageIcon, Link as LinkIcon, BookOpen, ShieldAlert, CheckCircle2, AlertCircle, ChevronDown } from "lucide-react";
 
-// 1. Zod Schema strictly matching your Mongoose Schema limits
+// Zod Schema strictly matching your Mongoose Schema limits
 const profileSchema = z.object({
     firstName: z.string().min(3, "Min 3 characters").max(50, "Max 50 characters").optional().or(z.literal('')),
     lastName: z.string().min(3, "Min 3 characters").max(50, "Max 50 characters").optional().or(z.literal('')),
@@ -51,7 +51,6 @@ function EditProfile() {
 
     const profilePicUrl = watch("profilePicture");
 
-    // NEW: Fetch completely fresh, authoritative pre-existing data right on component load
     useEffect(() => {
         const fetchCurrentProfileData = async () => {
             try {
@@ -59,13 +58,11 @@ function EditProfile() {
                 const userData = res.data?.user;
 
                 if (userData) {
-                    // Update read-only displays
                     setStaticCredentials({
                         userName: userData.userName || "",
                         emailId: userData.emailId || ""
                     });
 
-                    // React Hook Form reset to map everything cleanly into the fields
                     reset({
                         firstName: userData.firstName || "",
                         lastName: userData.lastName || "",
@@ -92,7 +89,7 @@ function EditProfile() {
     const onSubmit = async (data) => {
         setStatus(null);
 
-        // Only extract fields that the user actually changed (Partial Update)
+        // Only extract fields that the user actually changed
         const partialData = Object.keys(dirtyFields).reduce((acc, key) => {
             acc[key] = data[key];
             return acc;
@@ -134,26 +131,34 @@ function EditProfile() {
 
     if (accountLoading) {
         return (
-            <div className="min-h-screen bg-[#080808] text-zinc-300 flex items-center justify-center">
+            <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
                 <span className="loading loading-spinner loading-lg text-[#C9963A]"></span>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-[#080808] text-zinc-300 pb-12 font-sans selection:bg-[#C9963A] selection:text-black">
+        <div className="min-h-screen bg-zinc-950 text-zinc-300 pb-12 font-sans relative selection:bg-[#C9963A] selection:text-black">
+            
+            {/* Glowing Background Orbs */}
+            <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-[#C9963A]/[0.02] blur-[100px]" />
+                <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full bg-[#C9963A]/[0.02] blur-[100px]" />
+            </div>
+
             <Header />
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 mt-10">
+            
+            <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 mt-12">
                 
-                <motion.div initial="hidden" animate="visible" variants={containerVariants} className="space-y-6">
+                <motion.div initial="hidden" animate="visible" variants={containerVariants} className="space-y-8">
                     
                     {/* Header Section */}
                     <motion.div variants={sectionVariants}>
-                        <h1 className="text-3xl font-bold text-white tracking-wide">Edit Profile</h1>
-                        <p className="text-zinc-500 text-sm mt-1">Customize your presence on HackForge.</p>
+                        <h1 className="font-display text-4xl font-black text-white tracking-wide">Edit Profile</h1>
+                        <p className="text-zinc-500 font-medium text-sm mt-2">Customize your presence and public identity on HackForge.</p>
                         
                         {status?.msg && (
-                            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className={`mt-4 p-4 rounded-xl text-sm flex items-center gap-3 font-medium border ${status.type === 'error' ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'}`}>
+                            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className={`mt-6 p-4 rounded-xl text-sm flex items-center gap-3 font-bold border backdrop-blur-sm shadow-lg ${status.type === 'error' ? 'bg-red-500/10 text-red-400 border-red-500/20 shadow-red-500/5' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-emerald-500/5'}`}>
                                 {status.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
                                 {status.msg}
                             </motion.div>
@@ -162,35 +167,37 @@ function EditProfile() {
 
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
                         
-                        {/* 1. Account Identity (Read-Only via direct fetched baseline state) */}
-                        <motion.div variants={sectionVariants} className="bg-[#111] border border-white/[0.04] rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+                        {/* 1. Account Identity (Read-Only) */}
+                        <motion.div variants={sectionVariants} className="bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl relative overflow-hidden group hover:border-zinc-700/80 transition-colors duration-300">
                             <div className="absolute top-0 left-0 w-1 h-full bg-zinc-700"></div>
-                            <h3 className="text-white font-bold mb-6 text-xs uppercase tracking-widest flex items-center gap-2">
+                            <h3 className="font-display text-white font-bold mb-6 text-[11px] uppercase tracking-widest flex items-center gap-2">
                                 <ShieldAlert size={16} className="text-zinc-500" /> Account Credentials
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Username</label>
-                                    <input type="text" value={staticCredentials.userName} disabled className="w-full bg-black/40 border border-white/[0.02] rounded-xl px-4 py-3 text-zinc-500 cursor-not-allowed font-medium" />
+                                    <label className="font-display block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Username</label>
+                                    <input type="text" value={staticCredentials.userName} disabled className="w-full bg-zinc-950/50 border border-zinc-800/50 rounded-xl px-4 py-3 text-zinc-500 cursor-not-allowed font-mono text-sm" />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Email Address</label>
-                                    <input type="email" value={staticCredentials.emailId} disabled className="w-full bg-black/40 border border-white/[0.02] rounded-xl px-4 py-3 text-zinc-500 cursor-not-allowed font-medium" />
+                                    <label className="font-display block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Email Address</label>
+                                    <input type="email" value={staticCredentials.emailId} disabled className="w-full bg-zinc-950/50 border border-zinc-800/50 rounded-xl px-4 py-3 text-zinc-500 cursor-not-allowed font-mono text-sm" />
                                 </div>
                             </div>
-                            <p className="text-xs text-zinc-600 mt-4">Username and Email cannot be changed to preserve submission integrity.</p>
+                            <p className="text-xs font-medium text-zinc-600 mt-5 bg-zinc-950/30 p-3 rounded-lg border border-zinc-800/30">
+                                Username and Email cannot be changed to preserve competitive submission integrity.
+                            </p>
                         </motion.div>
 
                         {/* 2. Public Profile */}
-                        <motion.div variants={sectionVariants} className="bg-[#111] border border-white/[0.04] rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+                        <motion.div variants={sectionVariants} className="bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl relative overflow-hidden group hover:border-[#C9963A]/30 transition-colors duration-300">
                             <div className="absolute top-0 left-0 w-1 h-full bg-[#C9963A]"></div>
-                            <h3 className="text-white font-bold mb-6 text-xs uppercase tracking-widest flex items-center gap-2">
+                            <h3 className="font-display text-white font-bold mb-6 text-[11px] uppercase tracking-widest flex items-center gap-2">
                                 <User size={16} className="text-[#C9963A]" /> Personal Information
                             </h3>
                             
                             {/* Profile Picture Row */}
                             <div className="flex flex-col sm:flex-row gap-6 mb-8 items-start">
-                                <div className="w-24 h-24 rounded-2xl bg-[#1a1a1a] border border-white/10 flex items-center justify-center shrink-0 overflow-hidden shadow-lg">
+                                <div className="w-24 h-24 rounded-2xl bg-zinc-950 border border-zinc-800 flex items-center justify-center shrink-0 overflow-hidden shadow-inner">
                                     {profilePicUrl ? (
                                         <img src={profilePicUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
                                     ) : (
@@ -198,88 +205,93 @@ function EditProfile() {
                                     )}
                                 </div>
                                 <div className="flex-1 w-full">
-                                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Profile Picture URL</label>
-                                    <input type="url" {...register("profilePicture")} placeholder="https://example.com/my-photo.jpg" className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#C9963A]/60 focus:bg-white/[0.04] transition-all" />
-                                    {errors.profilePicture && <span className="text-red-400 text-xs mt-1.5 block font-medium">{errors.profilePicture.message}</span>}
+                                    <label className="font-display block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Profile Picture URL</label>
+                                    <input type="url" {...register("profilePicture")} placeholder="https://example.com/my-photo.jpg" className={`w-full bg-zinc-950 border rounded-xl px-4 py-3 text-zinc-200 focus:outline-none focus:bg-zinc-900 font-mono text-sm transition-all shadow-sm ${errors.profilePicture ? 'border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/10' : 'border-zinc-800 focus:border-[#C9963A]/50 focus:ring-2 focus:ring-[#C9963A]/10'}`} />
+                                    {errors.profilePicture && <span className="font-display text-red-400 text-[10px] uppercase tracking-wider mt-2 block font-bold">{errors.profilePicture.message}</span>}
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">First Name</label>
-                                    <input type="text" {...register("firstName")} className={`w-full bg-white/[0.02] border rounded-xl px-4 py-3 text-white focus:outline-none focus:bg-white/[0.04] transition-all ${errors.firstName ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-[#C9963A]/60'}`} />
-                                    {errors.firstName && <span className="text-red-400 text-xs mt-1.5 block font-medium">{errors.firstName.message}</span>}
+                                    <label className="font-display block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">First Name</label>
+                                    <input type="text" {...register("firstName")} className={`w-full bg-zinc-950 border rounded-xl px-4 py-3 text-zinc-200 focus:outline-none focus:bg-zinc-900 text-sm font-medium transition-all shadow-sm ${errors.firstName ? 'border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/10' : 'border-zinc-800 focus:border-[#C9963A]/50 focus:ring-2 focus:ring-[#C9963A]/10'}`} />
+                                    {errors.firstName && <span className="font-display text-red-400 text-[10px] uppercase tracking-wider mt-2 block font-bold">{errors.firstName.message}</span>}
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Last Name</label>
-                                    <input type="text" {...register("lastName")} className={`w-full bg-white/[0.02] border rounded-xl px-4 py-3 text-white focus:outline-none focus:bg-white/[0.04] transition-all ${errors.lastName ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-[#C9963A]/60'}`} />
-                                    {errors.lastName && <span className="text-red-400 text-xs mt-1.5 block font-medium">{errors.lastName.message}</span>}
+                                    <label className="font-display block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Last Name</label>
+                                    <input type="text" {...register("lastName")} className={`w-full bg-zinc-950 border rounded-xl px-4 py-3 text-zinc-200 focus:outline-none focus:bg-zinc-900 text-sm font-medium transition-all shadow-sm ${errors.lastName ? 'border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/10' : 'border-zinc-800 focus:border-[#C9963A]/50 focus:ring-2 focus:ring-[#C9963A]/10'}`} />
+                                    {errors.lastName && <span className="font-display text-red-400 text-[10px] uppercase tracking-wider mt-2 block font-bold">{errors.lastName.message}</span>}
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Age</label>
-                                    <input type="number" {...register("age")} className={`w-full bg-white/[0.02] border rounded-xl px-4 py-3 text-white focus:outline-none focus:bg-white/[0.04] transition-all ${errors.age ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-[#C9963A]/60'}`} />
-                                    {errors.age && <span className="text-red-400 text-xs mt-1.5 block font-medium">{errors.age.message}</span>}
+                                    <label className="font-display block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Age</label>
+                                    <input type="number" {...register("age")} className={`w-full bg-zinc-950 border rounded-xl px-4 py-3 text-zinc-200 focus:outline-none focus:bg-zinc-900 font-mono text-sm transition-all shadow-sm ${errors.age ? 'border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/10' : 'border-zinc-800 focus:border-[#C9963A]/50 focus:ring-2 focus:ring-[#C9963A]/10'}`} />
+                                    {errors.age && <span className="font-display text-red-400 text-[10px] uppercase tracking-wider mt-2 block font-bold">{errors.age.message}</span>}
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Gender</label>
-                                    <select {...register("gender")} className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#C9963A]/60 focus:bg-white/[0.04] transition-all appearance-none cursor-pointer">
-                                        <option value="male" className="bg-[#111]">Male</option>
-                                        <option value="female" className="bg-[#111]">Female</option>
-                                        <option value="other" className="bg-[#111]">Other</option>
-                                    </select>
+                                    <label className="font-display block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Gender</label>
+                                    <div className="relative">
+                                        <select {...register("gender")} className="w-full appearance-none bg-zinc-950 border border-zinc-800 rounded-xl pl-4 pr-10 py-3 text-zinc-200 focus:outline-none focus:border-[#C9963A]/50 focus:bg-zinc-900 focus:ring-2 focus:ring-[#C9963A]/10 text-sm font-medium transition-all cursor-pointer shadow-sm">
+                                            <option value="male" className="bg-zinc-900">Male</option>
+                                            <option value="female" className="bg-zinc-900">Female</option>
+                                            <option value="other" className="bg-zinc-900">Other</option>
+                                        </select>
+                                        <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>
 
                         {/* 3. About & Education */}
-                        <motion.div variants={sectionVariants} className="bg-[#111] border border-white/[0.04] rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+                        <motion.div variants={sectionVariants} className="bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl relative overflow-hidden group hover:border-emerald-500/30 transition-colors duration-300">
                             <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
-                            <h3 className="text-white font-bold mb-6 text-xs uppercase tracking-widest flex items-center gap-2">
+                            <h3 className="font-display text-white font-bold mb-6 text-[11px] uppercase tracking-widest flex items-center gap-2">
                                 <BookOpen size={16} className="text-emerald-500" /> Background
                             </h3>
                             <div className="space-y-6">
                                 <div>
-                                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Bio</label>
-                                    <textarea {...register("bio")} rows="3" placeholder="Tell the community about yourself..." className={`w-full bg-white/[0.02] border rounded-xl px-4 py-3 text-white focus:outline-none focus:bg-white/[0.04] transition-all resize-none ${errors.bio ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-emerald-500/50'}`}></textarea>
-                                    {errors.bio && <span className="text-red-400 text-xs mt-1.5 block font-medium">{errors.bio.message}</span>}
+                                    <label className="font-display block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Bio</label>
+                                    <textarea {...register("bio")} rows="3" placeholder="Tell the community about yourself..." className={`w-full bg-zinc-950 border rounded-xl px-4 py-3 text-zinc-200 focus:outline-none focus:bg-zinc-900 text-sm font-medium transition-all shadow-sm resize-none ${errors.bio ? 'border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/10' : 'border-zinc-800 focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/10'}`}></textarea>
+                                    {errors.bio && <span className="font-display text-red-400 text-[10px] uppercase tracking-wider mt-2 block font-bold">{errors.bio.message}</span>}
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">College / University</label>
-                                    <input type="text" {...register("college")} className={`w-full bg-white/[0.02] border rounded-xl px-4 py-3 text-white focus:outline-none focus:bg-white/[0.04] transition-all ${errors.college ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-emerald-500/50'}`} />
-                                    {errors.college && <span className="text-red-400 text-xs mt-1.5 block font-medium">{errors.college.message}</span>}
+                                    <label className="font-display block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">College / University</label>
+                                    <input type="text" {...register("college")} className={`w-full bg-zinc-950 border rounded-xl px-4 py-3 text-zinc-200 focus:outline-none focus:bg-zinc-900 text-sm font-medium transition-all shadow-sm ${errors.college ? 'border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/10' : 'border-zinc-800 focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/10'}`} />
+                                    {errors.college && <span className="font-display text-red-400 text-[10px] uppercase tracking-wider mt-2 block font-bold">{errors.college.message}</span>}
                                 </div>
                             </div>
                         </motion.div>
 
                         {/* 4. Social Links */}
-                        <motion.div variants={sectionVariants} className="bg-[#111] border border-white/[0.04] rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+                        <motion.div variants={sectionVariants} className="bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl relative overflow-hidden group hover:border-blue-500/30 transition-colors duration-300">
                             <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
-                            <h3 className="text-white font-bold mb-6 text-xs uppercase tracking-widest flex items-center gap-2">
+                            <h3 className="font-display text-white font-bold mb-6 text-[11px] uppercase tracking-widest flex items-center gap-2">
                                 <LinkIcon size={16} className="text-blue-500" /> Links
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">GitHub URL</label>
-                                    <input type="url" {...register("github")} placeholder="https://github.com/..." className={`w-full bg-white/[0.02] border rounded-xl px-4 py-3 text-white focus:outline-none focus:bg-white/[0.04] transition-all ${errors.github ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-blue-500/50'}`} />
-                                    {errors.github && <span className="text-red-400 text-xs mt-1.5 block font-medium">{errors.github.message}</span>}
+                                    <label className="font-display block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">GitHub URL</label>
+                                    <input type="url" {...register("github")} placeholder="https://github.com/..." className={`w-full bg-zinc-950 border rounded-xl px-4 py-3 text-zinc-200 focus:outline-none focus:bg-zinc-900 font-mono text-sm transition-all shadow-sm ${errors.github ? 'border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/10' : 'border-zinc-800 focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/10'}`} />
+                                    {errors.github && <span className="font-display text-red-400 text-[10px] uppercase tracking-wider mt-2 block font-bold">{errors.github.message}</span>}
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">LinkedIn URL</label>
-                                    <input type="url" {...register("linkedin")} placeholder="https://linkedin.com/in/..." className={`w-full bg-white/[0.02] border rounded-xl px-4 py-3 text-white focus:outline-none focus:bg-white/[0.04] transition-all ${errors.linkedin ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-blue-500/50'}`} />
-                                    {errors.linkedin && <span className="text-red-400 text-xs mt-1.5 block font-medium">{errors.linkedin.message}</span>}
+                                    <label className="font-display block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">LinkedIn URL</label>
+                                    <input type="url" {...register("linkedin")} placeholder="https://linkedin.com/in/..." className={`w-full bg-zinc-950 border rounded-xl px-4 py-3 text-zinc-200 focus:outline-none focus:bg-zinc-900 font-mono text-sm transition-all shadow-sm ${errors.linkedin ? 'border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/10' : 'border-zinc-800 focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/10'}`} />
+                                    {errors.linkedin && <span className="font-display text-red-400 text-[10px] uppercase tracking-wider mt-2 block font-bold">{errors.linkedin.message}</span>}
                                 </div>
                             </div>
                         </motion.div>
 
                         {/* Sticky Action Footer */}
-                        <motion.div variants={sectionVariants} className="sticky bottom-6 z-10 bg-black/80 backdrop-blur-xl border border-white/10 rounded-3xl p-4 shadow-[0_20px_40px_rgba(0,0,0,0.8)] flex justify-end gap-4 items-center">
-                            {isDirty && <span className="text-xs text-zinc-400 font-medium mr-auto pl-4">Unsaved changes</span>}
-                            <button type="button" onClick={() => navigate('/profile')} className="px-6 py-2.5 rounded-xl text-zinc-400 hover:bg-white/5 hover:text-white transition-colors text-sm font-bold">
+                        <motion.div variants={sectionVariants} className="sticky bottom-8 z-20 bg-zinc-900/80 backdrop-blur-xl border border-zinc-800/80 rounded-2xl p-5 shadow-[0_20px_40px_rgba(0,0,0,0.5)] flex justify-end gap-4 items-center">
+                            {isDirty && <span className="font-display text-[10px] uppercase tracking-widest text-zinc-400 font-bold mr-auto pl-2">Unsaved changes</span>}
+                            
+                            <button type="button" onClick={() => navigate('/profile')} className="px-6 py-2.5 rounded-xl text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors text-sm font-bold">
                                 Cancel
                             </button>
-                            <button type="submit" disabled={isSubmitting || !isDirty} className="px-8 py-2.5 rounded-xl bg-[#C9963A] hover:bg-[#E0B455] text-black font-bold shadow-[0_0_15px_rgba(201,150,58,0.2)] disabled:opacity-50 disabled:shadow-none transition-all text-sm flex items-center gap-2">
+                            
+                            <button type="submit" disabled={isSubmitting || !isDirty} className="px-8 py-2.5 rounded-xl bg-[#C9963A] hover:bg-[#E0B455] text-black font-bold shadow-[0_0_20px_rgba(201,150,58,0.3)] disabled:opacity-50 disabled:shadow-none transition-all text-sm flex items-center gap-2">
                                 {isSubmitting ? <span className="loading loading-spinner loading-xs border-black"></span> : null}
-                                {isSubmitting ? 'Saving...' : 'Save Changes'}
+                                {isSubmitting ? 'Saving Updates...' : 'Save Changes'}
                             </button>
                         </motion.div>
 

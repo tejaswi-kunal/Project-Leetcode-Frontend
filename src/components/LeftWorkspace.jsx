@@ -3,26 +3,41 @@ import EditorialTab from "./EditorialTab";
 import SolutionsTab from "./SolutionsTab";
 import SubmissionsTab from "./SubmissionsTab";
 import CommentsTab from "./CommentsTab";
+import { FileText, BookOpen, Code2, History, MessageSquare } from "lucide-react"; // NEW: Premium Icons
 
 function LeftWorkspace({ problem, submissions, activeTab, setActiveTab }) {
+    // Structured tabs array for cleaner rendering and automatic icon mapping
+    const tabs = [
+        { id: "description", label: "Description", icon: FileText },
+        { id: "editorial", label: "Editorial", icon: BookOpen },
+        { id: "solutions", label: "Solutions", icon: Code2 },
+        { id: "submissions", label: "Submissions", icon: History },
+        { id: "discuss", label: "Discuss", icon: MessageSquare },
+    ];
+
     return (
-        <div className="w-1/2 flex flex-col bg-white/[0.02] border border-white/[0.07] rounded-2xl overflow-hidden shadow-xl">
-            {/* Tabs Navigation */}
-            <div className="flex bg-[#111] border-b border-white/[0.07] px-2 overflow-x-auto no-scrollbar shrink-0">
-                {/* Added 'discuss' to the array */}
-                {["description", "editorial", "solutions", "submissions", "discuss"].map((tab) => (
-                    <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`px-4 py-3 text-xs font-medium uppercase tracking-wider border-b-2 transition-colors whitespace-nowrap
-                            ${activeTab === tab 
-                                ? "border-[#C9963A] text-[#C9963A]" 
-                                : "border-transparent text-zinc-500 hover:text-white"
-                            }`}
-                    >
-                        {tab}
-                    </button>
-                ))}
+        <div className="w-1/2 flex flex-col bg-[#0a0a0a] border border-white/[0.06] rounded-2xl overflow-hidden shadow-2xl relative z-10">
+            
+            {/* Premium Tabs Navigation */}
+            <div className="flex bg-[#111] border-b border-white/[0.06] overflow-x-auto no-scrollbar shrink-0">
+                {tabs.map(({ id, label, icon: Icon }) => {
+                    const isActive = activeTab === id;
+                    return (
+                        <button
+                            key={id}
+                            onClick={() => setActiveTab(id)}
+                            // APPLIED font-display and flex layout for icons
+                            className={`flex items-center gap-2 px-5 py-3.5 text-[11px] font-display font-bold uppercase tracking-widest border-b-2 transition-all duration-300 whitespace-nowrap
+                                ${isActive 
+                                    ? "border-[#C9963A] text-[#C9963A] bg-[#C9963A]/[0.03]" 
+                                    : "border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.02]"
+                                }`}
+                        >
+                            <Icon size={14} className={isActive ? "text-[#C9963A]" : "text-zinc-600"} />
+                            {label}
+                        </button>
+                    );
+                })}
             </div>
 
             {/* Tab Content Rendering */}
@@ -31,7 +46,6 @@ function LeftWorkspace({ problem, submissions, activeTab, setActiveTab }) {
                 {activeTab === "editorial" && <EditorialTab />}
                 {activeTab === "solutions" && <SolutionsTab problem={problem} />}
                 {activeTab === "submissions" && <SubmissionsTab submissions={submissions} />}
-                {/* Render CommentsTab when discuss is active */}
                 {activeTab === "discuss" && <CommentsTab problemId={problem._id} />}
             </div>
         </div>

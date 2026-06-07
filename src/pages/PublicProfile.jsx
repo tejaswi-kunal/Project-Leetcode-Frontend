@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
+import { createPortal } from "react-dom"; // Keeps the tooltip working perfectly
 import { useParams, useNavigate } from "react-router";
 import Header from "../components/Header";
-import ProfileSidebar from "../components/ProfileSidebar"; // Reusing our amazing sidebar component
+import ProfileSidebar from "../components/ProfileSidebar";
 import axiosClient from "../utils/axiosClient";
 import { Activity, Lock } from "lucide-react";
 import { motion } from 'framer-motion';
 
-// --- Reusing the Custom Heatmap for the Public Profile ---
+// --- Reusing the Upgraded Custom Heatmap ---
 const CustomHeatmap = ({ activityCalendar }) => {
     const [tooltip, setTooltip] = useState(null);
     const scrollContainerRef = useRef(null);
@@ -47,11 +48,11 @@ const CustomHeatmap = ({ activityCalendar }) => {
 
     const getBgColor = (level) => {
         switch(level) {
-            case 1: return 'bg-[#0e4429] border border-[#0e4429]';
-            case 2: return 'bg-[#006d32] border border-[#006d32]';
-            case 3: return 'bg-[#26a641] border border-[#26a641]';
-            case 4: return 'bg-[#39d353] border border-[#39d353]';
-            default: return 'bg-[#1a1a1a] border border-white/[0.04]'; 
+            case 1: return 'bg-emerald-900 border border-emerald-800/50';
+            case 2: return 'bg-emerald-700 border border-emerald-600/50';
+            case 3: return 'bg-emerald-500 border border-emerald-400/50';
+            case 4: return 'bg-emerald-400 border border-emerald-300/50 shadow-[0_0_10px_rgba(52,211,153,0.4)]';
+            default: return 'bg-zinc-800/50 border border-zinc-700/50'; 
         }
     };
 
@@ -60,27 +61,46 @@ const CustomHeatmap = ({ activityCalendar }) => {
             <div ref={scrollContainerRef} className="flex gap-6 overflow-x-auto pb-4 pt-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent scroll-smooth">
                 {heatmapData.map((month) => (
                     <div key={month.id} className="flex flex-col gap-2.5 shrink-0">
-                        <span className="text-xs text-zinc-500 font-semibold uppercase tracking-widest pl-1">{month.name}</span>
+                        <span className="font-display text-[10px] text-zinc-500 font-bold uppercase tracking-widest pl-1">{month.name}</span>
                         <div className="grid grid-rows-7 grid-flow-col gap-1.5">
                             {month.days.map((day, idx) => (
-                                <div key={idx} onMouseEnter={(e) => setTooltip({ x: e.clientX, y: e.clientY, text: `${day.count} submissions on ${day.displayDate}` })} onMouseLeave={() => setTooltip(null)} className={`w-3.5 h-3.5 rounded-[3px] cursor-pointer hover:ring-2 hover:ring-white/50 transition-all duration-200 ${getBgColor(day.level)}`} />
+                                <div 
+                                    key={idx} 
+                                    onMouseEnter={(e) => setTooltip({ x: e.clientX, y: e.clientY, text: `${day.count} submissions on ${day.displayDate}` })} 
+                                    onMouseLeave={() => setTooltip(null)} 
+                                    className={`w-3.5 h-3.5 rounded-[3px] cursor-pointer hover:ring-2 hover:ring-white/50 transition-all duration-200 ${getBgColor(day.level)}`} 
+                                />
                             ))}
                         </div>
                     </div>
                 ))}
             </div>
-            {tooltip && (
-                <div className="fixed z-[9999] bg-[#111] border border-white/10 text-white text-[11px] font-semibold px-3 py-2 rounded-lg shadow-[0_10px_40px_rgba(0,0,0,0.8)] pointer-events-none transform -translate-x-1/2 -translate-y-[130%]" style={{ top: tooltip.y, left: tooltip.x }}>
-                    {tooltip.text}
+
+            <div className="flex items-center gap-2 mt-4 font-display text-[10px] text-zinc-500 font-bold uppercase tracking-widest pl-1">
+                <span>Less</span>
+                <div className="flex gap-1.5">
+                    <div className="w-3.5 h-3.5 rounded-[3px] bg-zinc-800/50 border border-zinc-700/50"></div>
+                    <div className="w-3.5 h-3.5 rounded-[3px] bg-emerald-900"></div>
+                    <div className="w-3.5 h-3.5 rounded-[3px] bg-emerald-700"></div>
+                    <div className="w-3.5 h-3.5 rounded-[3px] bg-emerald-500"></div>
+                    <div className="w-3.5 h-3.5 rounded-[3px] bg-emerald-400"></div>
                 </div>
+                <span>More</span>
+            </div>
+
+            {tooltip && typeof document !== 'undefined' && createPortal(
+                <div className="fixed z-[9999] bg-zinc-900 border border-zinc-700 text-white font-mono text-[11px] font-semibold px-3 py-2 rounded-lg shadow-2xl pointer-events-none transform -translate-x-1/2 -translate-y-[130%]" style={{ top: tooltip.y, left: tooltip.x }}>
+                    {tooltip.text}
+                </div>,
+                document.body
             )}
         </div>
     );
 };
 
-// --- Public Profile Page ---
+// --- Upgraded Public Profile Page ---
 function PublicProfile() {
-    const { id } = useParams(); // Extract user ID from URL
+    const { id } = useParams(); 
     const navigate = useNavigate();
     
     const [publicUser, setPublicUser] = useState(null);
@@ -92,7 +112,6 @@ function PublicProfile() {
     useEffect(() => {
         const fetchPublicData = async () => {
             try {
-                // Fetch public profile and global stats concurrently
                 const [profileRes, statsRes] = await Promise.all([
                     axiosClient.get(`/auth/getPublicProfile/${id}`),
                     axiosClient.get('/problem/getProblemStats')
@@ -112,47 +131,54 @@ function PublicProfile() {
         if (id) fetchPublicData();
     }, [id]);
 
-    if (loading) return <div className="min-h-screen bg-[#080808] flex items-center justify-center"><span className="loading loading-spinner loading-lg text-[#C9963A]"></span></div>;
+    if (loading) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center"><span className="loading loading-spinner loading-lg text-[#C9963A]"></span></div>;
     
     if (error || !publicUser) {
         return (
-            <div className="min-h-screen bg-[#080808] text-zinc-300 flex flex-col items-center justify-center font-sans">
-                <h1 className="text-3xl font-bold text-white mb-4">User Not Found</h1>
-                <p className="text-zinc-500 mb-8">This profile doesn't exist or has been removed.</p>
-                <button onClick={() => navigate('/leaderboard')} className="px-6 py-3 bg-[#C9963A] text-black font-bold rounded-xl hover:bg-[#E0B455] transition-colors">Return to Leaderboard</button>
+            <div className="min-h-screen bg-zinc-950 text-zinc-300 flex flex-col items-center justify-center font-sans">
+                <h1 className="font-display text-4xl font-bold text-white mb-4 tracking-wide">User Not Found</h1>
+                <p className="text-zinc-500 mb-8 font-medium">This profile doesn't exist or has been removed.</p>
+                <button onClick={() => navigate('/leaderboard')} className="px-6 py-3 bg-[#C9963A] text-black font-bold rounded-xl hover:bg-[#E0B455] transition-colors shadow-lg shadow-[#C9963A]/20">
+                    Return to Leaderboard
+                </button>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-[#080808] text-zinc-300 pb-12 font-sans selection:bg-[#C9963A] selection:text-black">
+        <div className="min-h-screen bg-zinc-950 text-zinc-300 pb-12 font-sans relative selection:bg-[#C9963A] selection:text-black">
+            
+            {/* Glowing Background Orbs */}
+            <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-[#C9963A]/[0.02] blur-[100px]" />
+                <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full bg-[#C9963A]/[0.02] blur-[100px]" />
+            </div>
+
             <Header />
             
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-8 flex flex-col lg:flex-row gap-6">
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 mt-10 flex flex-col lg:flex-row gap-8">
                 
-                {/* Re-use the exact same Sidebar but pass the Public User Data! */}
                 <div className="w-full lg:w-[320px] shrink-0">
                     <ProfileSidebar user={publicUser} rank={rank} stats={problemStats} />
                 </div>
 
-                {/* Main Content Area */}
                 <div className="flex-1 flex flex-col gap-6 min-w-0">
                     
                     {/* Activity Heatmap */}
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="bg-[#111] border border-white/[0.04] rounded-3xl p-7 shadow-2xl hover:border-white/10 transition-colors duration-300">
-                        <h3 className="text-white font-bold mb-6 text-[11px] uppercase tracking-widest flex items-center gap-2">
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, type: "spring" }} className="bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-7 shadow-xl backdrop-blur-sm hover:border-emerald-500/30 transition-all duration-300">
+                        <h3 className="font-display font-bold text-white mb-6 text-[11px] uppercase tracking-widest flex items-center gap-2">
                             <Activity size={16} className="text-emerald-500" /> Activity Graph
                         </h3>
                         <CustomHeatmap activityCalendar={publicUser.activityCalendar} />
                     </motion.div>
 
-                    {/* Privacy Banner indicating why submissions are hidden */}
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="bg-[#111] border border-white/[0.04] rounded-3xl p-10 shadow-2xl flex flex-col items-center justify-center text-center">
-                        <div className="w-16 h-16 rounded-full bg-white/[0.02] border border-white/5 flex items-center justify-center mb-4">
+                    {/* Privacy Banner */}
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1, type: "spring" }} className="bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-12 shadow-xl backdrop-blur-sm flex flex-col items-center justify-center text-center flex-1">
+                        <div className="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-5 shadow-inner">
                             <Lock size={24} className="text-zinc-600" />
                         </div>
-                        <h3 className="text-white font-bold text-lg tracking-wide mb-2">Recent Submissions are Private</h3>
-                        <p className="text-zinc-500 text-sm max-w-md">To ensure competitive integrity and prevent code plagiarism, recent submissions and code history are only visible to the account owner.</p>
+                        <h3 className="font-display text-white font-bold text-xl tracking-wide mb-3">Recent Submissions are Private</h3>
+                        <p className="text-zinc-500 text-sm max-w-md leading-relaxed font-medium">To ensure competitive integrity and prevent code plagiarism, recent submissions and code history are strictly restricted to the account owner.</p>
                     </motion.div>
 
                 </div>

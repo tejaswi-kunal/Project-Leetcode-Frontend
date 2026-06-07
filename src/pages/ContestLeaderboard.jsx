@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { useParams, useNavigate } from "react-router";
+import { useSelector } from "react-redux";
 import Header from "../components/Header";
 import axiosClient from "../utils/axiosClient";
-import { Trophy, Medal, ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { Trophy, Medal, ChevronLeft, ChevronRight, Target, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 const containerVariants = {
@@ -15,39 +16,52 @@ const rowVariants = {
     visible: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 100, damping: 15 } }
 };
  
-function Leaderboard() {
+function ContestLeaderboard() {
+    const { id } = useParams(); // Contest ID
     const navigate = useNavigate();
+    
+    // Get logged-in user from Redux to handle profile redirects correctly
+    const { user: authUser } = useSelector((state) => state.authSlice);
+
     const [leaderboard, setLeaderboard] = useState([]);
+    const [totalProblems, setTotalProblems] = useState(0);
     const [currentUserStats, setCurrentUserStats] = useState(null);
     const [page, setPage] = useState(1);
     const [limit] = useState(10);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchLeaderboardData = async () => {
+        const fetchContestData = async () => {
             setLoading(true);
             try {
-                const [leaderboardRes, accountRes] = await Promise.all([
-                    axiosClient.get(`/leaderboard/getLeaderboard?page=${page}&limit=${limit}`),
-                    axiosClient.get('/auth/getAccount')
+                // Fetch Leaderboard and Personal Rank concurrently
+                const [leaderboardRes, rankRes] = await Promise.all([
+                    axiosClient.get(`/contest/getLeaderBoard/${id}?page=${page}&limit=${limit}`),
+                    axiosClient.get(`/contest/myRank/${id}`).catch(() => ({ data: null })) // Catch if user isn't registered
                 ]);
 
-                setLeaderboard(leaderboardRes.data.users || []);
-                setCurrentUserStats({
-                    user: accountRes.data.user,
-                    rank: accountRes.data.rank
-                });
+                setLeaderboard(leaderboardRes.data.leaderboard || []);
+                setTotalProblems(leaderboardRes.data.totalProblems || 0);
+
+                if (rankRes.data) {
+                    setCurrentUserStats({
+                        participant: rankRes.data.user,
+                        rank: rankRes.data.rank,
+                        solvedCount: rankRes.data.solvedCount
+                    });
+                }
             } catch (err) {
-                console.error("Error fetching leaderboard", err);
+                console.error("Error fetching contest leaderboard", err);
             } finally {
                 setLoading(false);
             }
         };
-        fetchLeaderboardData();
-    }, [page, limit]);
+        fetchContestData();
+    }, [id, page, limit]);
 
     const handleUserClick = (targetUserId) => {
-        if (currentUserStats?.user?._id === targetUserId) {
+        // If clicking on yourself, go to private profile. Otherwise, public profile.
+        if (authUser?._id === targetUserId) {
             navigate('/profile');
         } else {
             navigate(`/profile/${targetUserId}`);
@@ -70,13 +84,13 @@ function Leaderboard() {
                 
                 {/* Header Text Area */}
                 <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="text-center">
+                    <span className="font-mono text-xs font-bold text-[#C9963A] uppercase tracking-widest mb-2 block">Match Results</span>
                     <h1 className="text-3xl font-display font-black text-white tracking-wide flex items-center justify-center gap-3">
-                        <Trophy className="text-[#C9963A]" size={32} /> Global Leaderboard
+                        <Target className="text-[#C9963A]" size={32} /> Contest Leaderboard
                     </h1>
-                    <p className="text-zinc-500 mt-4 text-s">Compete with the best. Solve problems, earn points, and climb the ranks.</p>
                 </motion.div>
 
-                {/* THE FIX: Hardcoded Spacer Div to force an unbreakable 64px (4rem) gap */}
+                {/* Hardcoded Spacer Div to force an unbreakable 64px (4rem) gap */}
                 <div className="h-16 w-full"></div>
 
                 <div className="bg-[#111] border border-white/[0.06] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
@@ -92,21 +106,29 @@ function Leaderboard() {
                                 <div className="w-px h-10 bg-white/10 mx-2"></div>
                                 <div className="flex items-center gap-4">
                                     <div className="w-10 h-10 rounded-xl bg-[#1a1a1a] border border-[#C9963A]/30 flex items-center justify-center text-[#C9963A] font-bold shadow-[0_0_10px_rgba(201,150,58,0.15)] overflow-hidden shrink-0">
-                                        {currentUserStats.user?.profilePicture ? (
-                                            <img src={currentUserStats.user.profilePicture} alt="Profile" className="w-full h-full object-cover" />
+                                        {authUser?.profilePicture ? (
+                                            <img src={authUser.profilePicture} alt="Profile" className="w-full h-full object-cover" />
                                         ) : (
-                                            currentUserStats.user?.userName?.slice(0, 2).toUpperCase()
+                                            authUser?.userName?.slice(0, 2).toUpperCase()
                                         )}
                                     </div>
                                     <div>
-                                        <h3 className="text-white font-bold text-base">{currentUserStats.user?.userName}</h3>
-                                        <p className="text-zinc-500 text-[10px] font-medium">Keep pushing forward!</p>
+                                        <h3 className="text-white font-bold text-base">{authUser?.userName}</h3>
+                                        <p className="text-zinc-500 text-[10px] font-medium uppercase tracking-widest">Contest Participant</p>
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-lg border border-white/5 shrink-0">
-                                <Star size={14} className="text-[#C9963A]" />
-                                <span className="text-[#C9963A] font-black text-lg">{currentUserStats.user?.totalPoints}</span>
+                            <div className="flex items-center gap-6">
+                                <div className="flex flex-col items-end">
+                                    <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-0.5">Solved</span>
+                                    <div className="flex items-center gap-1.5 text-emerald-400 font-mono font-bold">
+                                        <CheckCircle2 size={14} /> {currentUserStats.solvedCount} <span className="text-zinc-600 text-xs">/ {totalProblems}</span>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col items-end">
+                                    <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-0.5">Score</span>
+                                    <span className="text-[#C9963A] font-black text-lg leading-none">{currentUserStats.participant?.score}</span>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -115,7 +137,8 @@ function Leaderboard() {
                     <div className="flex items-center px-8 py-4 bg-[#161616] border-b border-white/[0.06] text-[9px] font-bold text-zinc-500 uppercase tracking-widest shrink-0">
                         <div className="w-16 text-center">Rank</div>
                         <div className="flex-1 px-4">Hacker</div>
-                        <div className="w-24 text-right">Total Points</div>
+                        <div className="w-32 text-center">Solved</div>
+                        <div className="w-24 text-right">Score</div>
                     </div>
 
                     {/* Leaderboard List - SCROLLABLE AREA */}
@@ -125,16 +148,16 @@ function Leaderboard() {
                         ) : (
                             <motion.div initial="hidden" animate="visible" variants={containerVariants}>
                                 {leaderboard.length === 0 ? (
-                                    <p className="text-center py-8 text-zinc-500 text-sm">No users found.</p>
+                                    <p className="text-center py-8 text-zinc-500 text-sm">No participants found.</p>
                                 ) : (
-                                    leaderboard.map((usr, index) => {
+                                    leaderboard.map((participant, index) => {
                                         const actualRank = (page - 1) * limit + index + 1;
                                         
                                         return (
                                             <motion.div 
-                                                key={usr._id} 
+                                                key={participant._id} 
                                                 variants={rowVariants}
-                                                onClick={() => handleUserClick(usr._id)}
+                                                onClick={() => handleUserClick(participant.user?._id)}
                                                 className="flex items-center px-8 py-4 border-b border-white/[0.03] last:border-b-0 hover:bg-white/[0.02] cursor-pointer transition-colors group"
                                             >
                                                 <div className="w-16 flex justify-center">
@@ -143,19 +166,24 @@ function Leaderboard() {
                                                 
                                                 <div className="flex-1 flex items-center gap-4 px-4">
                                                     <div className="w-9 h-9 rounded-lg bg-[#1a1a1a] border border-white/10 flex items-center justify-center text-zinc-400 text-xs font-bold overflow-hidden group-hover:border-[#C9963A]/40 transition-colors shrink-0">
-                                                        {usr.profilePicture ? (
-                                                            <img src={usr.profilePicture} alt="Profile" className="w-full h-full object-cover" />
+                                                        {participant.user?.profilePicture ? (
+                                                            <img src={participant.user.profilePicture} alt="Profile" className="w-full h-full object-cover" />
                                                         ) : (
-                                                            usr.userName?.slice(0, 2).toUpperCase()
+                                                            participant.user?.userName?.slice(0, 2).toUpperCase()
                                                         )}
                                                     </div>
                                                     <span className="text-white font-semibold text-sm group-hover:text-[#C9963A] transition-colors truncate">
-                                                        {usr.userName}
+                                                        {participant.user?.userName || "Unknown"}
                                                     </span>
+                                                </div>
+
+                                                <div className="w-32 flex justify-center items-center">
+                                                    <span className="text-zinc-300 font-mono text-sm">{participant.solvedProblems?.length || 0}</span>
+                                                    <span className="text-zinc-600 text-xs ml-1">/ {totalProblems}</span>
                                                 </div>
                                                 
                                                 <div className="w-24 text-right">
-                                                    <span className="text-white font-bold text-sm">{usr.totalPoints}</span>
+                                                    <span className="text-[#C9963A] font-bold text-sm">{participant.score}</span>
                                                 </div>
                                             </motion.div>
                                         );
@@ -191,4 +219,4 @@ function Leaderboard() {
     );
 }
 
-export default Leaderboard;
+export default ContestLeaderboard;

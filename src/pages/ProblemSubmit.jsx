@@ -129,7 +129,37 @@ function ProblemSubmit() {
 
             setActiveTab("submissions");
         } catch (err) {
-            console.error(err);
+            console.error("Submission Error:", err);
+            
+            if (err.response) {
+                let backendMsg = err.response.data;
+
+                // Failsafe: If Express hard-crashes, it sends HTML. This prevents ugly UI.
+                if (typeof backendMsg !== 'string' || backendMsg.includes('<html')) {
+                    backendMsg = "An unexpected server error occurred.";
+                }
+
+                if (err.response.status === 429) {
+                    setSubmitResult({ 
+                        isApiError: true, 
+                        status: "Rate Limit Exceeded", 
+                        apiErrorMessage: backendMsg 
+                    });
+                } else {
+                    setSubmitResult({ 
+                        isApiError: true, 
+                        status: "Request Error", 
+                        apiErrorMessage: backendMsg 
+                    });
+                }
+                } else {
+                // Failsafe for complete network failure (backend is off)
+                setSubmitResult({ 
+                    isApiError: true, 
+                    status: "Network Error", 
+                    apiErrorMessage: "Could not reach the server." 
+                });
+            }
         } finally {
             setIsSubmitting(false);
         }

@@ -3,14 +3,17 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { loginUser } from "../redux/authSlice";
+import { Eye, EyeOff, AlertCircle } from "lucide-react"; // NEW: Lucide Imports
+import Header from "../components/Header"; // NEW: Header Import
  
 const userSchema = z.object({
     emailId: z.string().email("Enter a valid email address"),
     password: z.string().min(8, "Minimum 8 characters required")
 });
  
+// Kept Brand SVGs as Lucide doesn't have colored brand icons
 const GoogleIcon = () => (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
         <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908C16.658 14.013 17.64 11.706 17.64 9.2z" fill="#4285F4"/>
@@ -26,185 +29,149 @@ const GitHubIcon = () => (
     </svg>
 );
  
-const EyeIcon = ({ open }) =>
-    open ? (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-            <circle cx="12" cy="12" r="3"/>
-        </svg>
-    ) : (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-            <line x1="1" y1="1" x2="23" y2="23"/>
-        </svg>
-    );
- 
 function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const location = useLocation(); // Extracted location to handle smart redirects
  
     const { loading, error, isAuthenticated } = useSelector((state) => state.authSlice);
  
     useEffect(() => {
         if (isAuthenticated) {
-            navigate('/');
+            // SMART REDIRECT: Go back to where they came from, or default to homepage
+            const origin = location.state?.from?.pathname || '/';
+            navigate(origin, { replace: true });
         }
-    }, [isAuthenticated]);
+    }, [isAuthenticated, navigate, location]);
  
     const { register, handleSubmit, formState: { errors } } = useForm({
         resolver: zodResolver(userSchema)
     });
  
-    // ✅ removed fake setTimeout — redux thunk handles async itself
     const submittedData = (data) => {
         dispatch(loginUser(data));
     };
  
     return (
-        <div className="min-h-screen bg-[#080808] flex items-center justify-center px-4">
- 
-            {/* Background blobs */}
-            <div className="fixed inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-[#C9963A]/8 blur-[100px]" />
-                <div className="absolute -bottom-32 -right-32 w-80 h-80 rounded-full bg-[#C9963A]/5 blur-[80px]" />
-            </div>
- 
-            {/* Card */}
-            <div className="relative z-10 w-full max-w-md
-                bg-white/[0.04] backdrop-blur-xl
-                border border-white/10
-                rounded-3xl p-8
-                shadow-[0_24px_64px_rgba(0,0,0,0.5)]
-                hover:border-[#C9963A]/25
-                transition-colors duration-300"
-            >
-                {/* Header */}
-                <div className="text-center mb-7">
-                    <p className="text-[#C9963A] text-xs tracking-widest uppercase mb-3 font-medium">
-                        Welcome Back
-                    </p>
-                    <h1 className="text-3xl font-bold text-white mb-2">
-                        Sign In
-                    </h1>
-                    <p className="text-zinc-500 text-sm">
-                        Good to see you again. Let's get coding.
-                    </p>
+        <div className="min-h-screen flex flex-col bg-[#080808]">
+            <Header /> {/* NEW: Header integration */}
+            
+            <div className="flex-1 flex items-center justify-center px-4 relative overflow-hidden">
+                {/* Background blobs */}
+                <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute top-10 left-10 w-96 h-96 rounded-full bg-[#C9963A]/8 blur-[100px]" />
+                    <div className="absolute bottom-10 right-10 w-80 h-80 rounded-full bg-[#C9963A]/5 blur-[80px]" />
                 </div>
- 
-                <form onSubmit={handleSubmit(submittedData)} className="flex flex-col gap-4">
- 
-                    {/* Email */}
-                    <div className="flex flex-col gap-1">
-                        <input
-                            type="email"
-                            {...register("emailId")}
-                            placeholder="Email Address"
-                            className="input w-full bg-white/[0.06] border border-white/10 text-white placeholder:text-zinc-600
-                                rounded-xl focus:outline-none focus:border-[#C9963A]/60 focus:bg-white/[0.08]
-                                transition-all duration-200"
-                        />
-                        {errors.emailId && (
-                            <span className="text-red-400 text-xs pl-1">{errors.emailId.message}</span>
-                        )}
+    
+                {/* Card */}
+                <div className="relative z-10 w-full max-w-md bg-[#111] border border-white/[0.06] rounded-3xl p-8 shadow-2xl hover:border-[#C9963A]/25 transition-colors duration-300">
+                    
+                    {/* Header with font-display */}
+                    <div className="text-center mb-8">
+                        <p className="font-display text-[#C9963A] text-[10px] tracking-widest uppercase mb-2 font-bold">
+                            Welcome Back
+                        </p>
+                        <h1 className="font-display text-3xl font-bold text-white mb-2">
+                            Sign In
+                        </h1>
+                        <p className="text-zinc-500 text-sm">
+                            Good to see you again. Let's get coding.
+                        </p>
                     </div>
- 
-                    {/* Password */}
-                    <div className="flex flex-col gap-1">
-                        <div className="relative">
+    
+                    <form onSubmit={handleSubmit(submittedData)} className="flex flex-col gap-4">
+    
+                        {/* Email */}
+                        <div className="flex flex-col gap-1.5">
                             <input
-                                type={showPassword ? "text" : "password"}
-                                {...register("password")}
-                                placeholder="Password"
-                                className="input w-full bg-white/[0.06] border border-white/10 text-white placeholder:text-zinc-600
-                                    rounded-xl focus:outline-none focus:border-[#C9963A]/60 focus:bg-white/[0.08]
-                                    transition-all duration-200 pr-12"
+                                type="email"
+                                {...register("emailId")}
+                                placeholder="Email Address"
+                                className="w-full bg-white/[0.03] border border-white/10 text-white placeholder:text-zinc-600 rounded-xl px-4 py-3 focus:outline-none focus:border-[#C9963A]/60 focus:bg-white/[0.05] transition-all duration-200"
                             />
-                            <button
-                                type="button"
-                                onClick={() => setShowPassword(v => !v)}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-[#C9963A] transition-colors duration-200"
-                            >
-                                <EyeIcon open={showPassword} />
-                            </button>
+                            {errors.emailId && <span className="text-red-400 text-xs pl-1 font-medium">{errors.emailId.message}</span>}
                         </div>
-                        {errors.password && (
-                            <span className="text-red-400 text-xs pl-1">{errors.password.message}</span>
-                        )}
-                    </div>
- 
-                    {/* Forgot password */}
-                    <div className="text-right -mt-1">
-                        <span className="text-zinc-600 text-xs cursor-pointer hover:text-[#C9963A] transition-colors duration-200">
-                            Forgot password?
-                        </span>
-                    </div>
- 
-                    {/* ✅ Global API error shown here */}
-                    {error && (
-                        <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 flex items-center gap-2">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-red-400 shrink-0">
-                                <circle cx="12" cy="12" r="10"/>
-                                <line x1="12" y1="8" x2="12" y2="12"/>
-                                <line x1="12" y1="16" x2="12.01" y2="16"/>
-                            </svg>
-                            <p className="text-red-400 text-xs">{error}</p>
+    
+                        {/* Password */}
+                        <div className="flex flex-col gap-1.5">
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    {...register("password")}
+                                    placeholder="Password"
+                                    className="w-full bg-white/[0.03] border border-white/10 text-white placeholder:text-zinc-600 rounded-xl px-4 py-3 focus:outline-none focus:border-[#C9963A]/60 focus:bg-white/[0.05] transition-all duration-200 pr-12"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(v => !v)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-[#C9963A] transition-colors duration-200"
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />} {/* NEW: Lucide Icon */}
+                                </button>
+                            </div>
+                            {errors.password && <span className="text-red-400 text-xs pl-1 font-medium">{errors.password.message}</span>}
                         </div>
-                    )}
- 
-                    {/* Submit — ✅ uses global loading */}
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="btn w-full rounded-xl border-none
-                            bg-[#C9963A] hover:bg-[#E0B455] text-black font-semibold
-                            hover:-translate-y-0.5 hover:shadow-[0_6px_24px_rgba(201,150,58,0.35)]
-                            disabled:opacity-60 disabled:cursor-not-allowed
-                            transition-all duration-200"
-                    >
-                        {loading ? (
-                            <span className="flex items-center gap-2">
-                                <span className="loading loading-spinner loading-xs" />
-                                Signing in...
+    
+                        <div className="text-right -mt-1">
+                            <span className="text-zinc-500 text-xs cursor-pointer hover:text-[#C9963A] transition-colors duration-200 font-medium">
+                                Forgot password?
                             </span>
-                        ) : "Sign In"}
-                    </button>
- 
-                    {/* Divider */}
-                    <div className="divider text-zinc-700 text-[10px] tracking-widest uppercase my-0">
-                        or continue with
-                    </div>
- 
-                    {/* Social */}
-                    <div className="grid grid-cols-2 gap-3">
-                        {[
-                            { label: "Google", Icon: GoogleIcon },
-                            { label: "GitHub", Icon: GitHubIcon }
-                        ].map(({ label, Icon }) => (
-                            <button
-                                key={label}
-                                type="button"
-                                className="btn rounded-xl bg-white/[0.05] border border-white/10 text-zinc-400
-                                    hover:border-[#C9963A]/40 hover:text-white hover:bg-white/[0.08]
-                                    transition-all duration-200 gap-2"
-                            >
-                                <Icon />
-                                {label}
-                            </button>
-                        ))}
-                    </div>
- 
-                    {/* ✅ Footer with working navigation */}
-                    <p className="text-center text-zinc-600 text-xs mt-1">
-                        Don't have an account?{" "}
-                        <span
-                            onClick={() => navigate('/signup')}
-                            className="text-[#C9963A] cursor-pointer hover:text-[#E0B455] transition-colors duration-200 font-medium"
+                        </div>
+    
+                        {/* Error Alert using Lucide AlertCircle */}
+                        {error && (
+                            <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 flex items-center gap-2.5">
+                                <AlertCircle size={16} className="text-red-400 shrink-0" />
+                                <p className="text-red-400 text-xs font-medium">{error}</p>
+                            </div>
+                        )}
+    
+                        {/* Submit Button */}
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full rounded-xl py-3 mt-2 bg-[#C9963A] hover:bg-[#E0B455] text-black font-bold hover:-translate-y-0.5 hover:shadow-[0_6px_24px_rgba(201,150,58,0.35)] disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200"
                         >
-                            Create one
-                        </span>
-                    </p>
-                </form>
+                            {loading ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <span className="loading loading-spinner loading-xs border-black" />
+                                    Signing in...
+                                </span>
+                            ) : "Sign In"}
+                        </button>
+    
+                        {/* Divider */}
+                        <div className="relative flex items-center my-2">
+                            <div className="flex-grow border-t border-white/[0.06]"></div>
+                            <span className="flex-shrink-0 mx-4 text-zinc-600 text-[10px] tracking-widest uppercase font-bold">or continue with</span>
+                            <div className="flex-grow border-t border-white/[0.06]"></div>
+                        </div>
+    
+                        {/* Social */}
+                        <div className="grid grid-cols-2 gap-3">
+                            {[
+                                { label: "Google", Icon: GoogleIcon },
+                                { label: "GitHub", Icon: GitHubIcon }
+                            ].map(({ label, Icon }) => (
+                                <button
+                                    key={label}
+                                    type="button"
+                                    className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-zinc-400 text-sm font-semibold hover:border-[#C9963A]/40 hover:text-white hover:bg-white/[0.05] transition-all duration-200"
+                                >
+                                    <Icon /> {label}
+                                </button>
+                            ))}
+                        </div>
+    
+                        <p className="text-center text-zinc-500 text-xs mt-3">
+                            Don't have an account?{" "}
+                            <span onClick={() => navigate('/signup')} className="text-[#C9963A] cursor-pointer hover:text-[#E0B455] transition-colors duration-200 font-bold">
+                                Create one
+                            </span>
+                        </p>
+                    </form>
+                </div>
             </div>
         </div>
     );
