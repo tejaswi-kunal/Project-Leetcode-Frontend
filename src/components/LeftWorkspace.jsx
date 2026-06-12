@@ -41,9 +41,10 @@ function LeftWorkspace({ problem, submissions, activeTab, setActiveTab }) {
             </div>
 
             {/* Tab Content Rendering */}
+            {/* Passing The Props To The Tabs */}
             <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                 {activeTab === "description" && <DescriptionTab problem={problem} />}
-                {activeTab === "editorial" && <EditorialTab />}
+                {activeTab === "editorial" && <EditorialTab problem={problem}/>}
                 {activeTab === "solutions" && <SolutionsTab problem={problem} />}
                 {activeTab === "submissions" && <SubmissionsTab submissions={submissions} />}
                 {activeTab === "discuss" && <CommentsTab problemId={problem._id} />}

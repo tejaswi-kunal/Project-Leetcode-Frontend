@@ -11,3 +11,9 @@
   /* 3. Sets JetBrains Mono for your code blocks using 'font-mono' */
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
+
+/* 4. Define your animation keyframes using standard CSS */
+@keyframes shrink {
+  0% { width: 100%; }
+  100% { width: 0%; }
+}
