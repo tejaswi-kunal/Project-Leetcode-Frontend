@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { checkUser } from "./redux/authSlice";
 
+import PremiumLoader from "./components/PremiumLoader";
+
 import Homepage from "./pages/Homepage";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
@@ -46,12 +48,9 @@ function App() {
     dispatch(checkUser());
   }, [dispatch]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#080808] flex items-center justify-center">
-        <span className="loading loading-spinner loading-lg text-[#C9963A]"></span>
-      </div>
-    );
+  if (loading) 
+  {
+    return <PremiumLoader />
   }
 
   // Strict Admin Check

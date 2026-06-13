@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router";
 import axiosClient from "../utils/axiosClient";
 import Header from "../components/Header";
+import PremiumLoader from "../components/PremiumLoader";
 import { Search, ChevronDown, Flame, ArrowRight, ArrowLeft, ArrowUp, ArrowDown, ThumbsUp } from "lucide-react";
 
 const TAGS = [
@@ -195,6 +196,11 @@ function Problems() {
             : "—";
  
     const hasFilters = search || difficulty || selectedTags.length > 0 || sortBy || listType !== "all";
+
+    if(fetchLoading)
+    {
+        return <PremiumLoader />
+    }
  
     return (
         <div className="min-h-screen bg-zinc-950 flex flex-col font-sans">
@@ -362,14 +368,7 @@ function Problems() {
                         <div className="font-display text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em] text-right">Submissions</div>
                         <div className="font-display text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em] text-right">Likes</div>
                     </div>
- 
-                    {fetchLoading && (
-                        <div className="flex flex-col items-center justify-center py-32">
-                            <span className="loading loading-spinner loading-lg text-[#C9963A] mb-4" />
-                            <p className="font-display text-zinc-500 font-bold uppercase tracking-widest text-xs">Loading Problem Bank...</p>
-                        </div>
-                    )}
- 
+
                     {fetchError && !fetchLoading && (
                         <div className="flex flex-col items-center justify-center py-32 bg-red-500/5">
                             <p className="font-display text-red-400 font-bold text-lg mb-2">System Error</p>

@@ -8,6 +8,7 @@ import {
     AlertCircle, Target, ArrowRight, ChevronLeft, ChevronRight, 
     UserPlus, ShieldAlert, Zap 
 } from "lucide-react";
+import PremiumLoader from "../components/PremiumLoader";
 
 function ContestHub() {
     const [activeTab, setActiveTab] = useState("upcoming");
@@ -87,7 +88,10 @@ function ContestHub() {
         });
     };
 
-    if (loading) return <div className="min-h-screen bg-[#080808] flex items-center justify-center"><span className="loading loading-spinner loading-lg text-[#C9963A]"></span></div>;
+    if (loading)
+    {
+        return <PremiumLoader />
+    }
 
     return (
         <div className="min-h-screen bg-[#080808] text-zinc-300 font-sans relative selection:bg-[#C9963A] selection:text-black pb-20">

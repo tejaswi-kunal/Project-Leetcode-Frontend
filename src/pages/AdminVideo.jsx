@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import axiosClient from '../utils/axiosClient';
 import { NavLink } from 'react-router'; 
 import { Video, UploadCloud, Trash2, Search, ChevronLeft, ChevronRight, AlertTriangle, CheckCircle2, AlertCircle, Activity } from 'lucide-react';
+import PremiumLoader from "../components/PremiumLoader";
 
 const AdminVideo = () => {
     const [problems, setProblems] = useState([]);
@@ -69,6 +70,10 @@ const AdminVideo = () => {
         if (!total || total === 0) return 0;
         return Math.round((accepted / total) * 100);
     };
+    if (loading)
+    {
+        return <PremiumLoader />
+    }
 
     return (
         <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 font-sans text-white h-full flex flex-col animate-in fade-in duration-500 pb-20 relative">
@@ -97,11 +102,6 @@ const AdminVideo = () => {
 
             {/* Premium Data Table */}
             <div className="bg-[#111] border border-white/5 rounded-2xl flex flex-col shadow-lg overflow-hidden flex-1 relative z-10">
-                {loading ? (
-                    <div className="flex-1 flex items-center justify-center min-h-[400px]">
-                        <span className="loading loading-spinner loading-lg text-purple-500"></span>
-                    </div>
-                ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
@@ -166,7 +166,6 @@ const AdminVideo = () => {
                             </tbody>
                         </table>
                     </div>
-                )}
 
                 {/* Pagination Controls */}
                 <div className="border-t border-white/5 bg-[#0a0a0a] p-4 flex items-center justify-between">

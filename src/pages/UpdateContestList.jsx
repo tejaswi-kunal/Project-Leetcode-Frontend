@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import axiosClient from "../utils/axiosClient";
 import { Edit3, AlertCircle, Search, Calendar, Clock } from "lucide-react";
+import PremiumLoader from "../components/PremiumLoader";
 
 function UpdateContestList() {
     const navigate = useNavigate();
@@ -37,6 +38,11 @@ function UpdateContestList() {
         }).format(date);
     };
 
+    if (loading) 
+    {
+        return <PremiumLoader />
+    }
+
     return (
         <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 font-sans text-white h-full flex flex-col animate-in fade-in duration-500 pb-20">
             
@@ -64,11 +70,7 @@ function UpdateContestList() {
 
             {/* Premium Data Table Container */}
             <div className="bg-[#111] border border-white/5 rounded-2xl flex flex-col shadow-lg overflow-hidden flex-1">
-                {loading ? (
-                    <div className="flex-1 flex items-center justify-center min-h-[400px]">
-                        <span className="loading loading-spinner loading-lg text-[#C9963A]"></span>
-                    </div>
-                ) : (
+                {loading ?  <PremiumLoader /> : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>

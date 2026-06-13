@@ -11,6 +11,7 @@ import {
   Calendar,
   Clock,
 } from "lucide-react";
+import PremiumLoader from "../components/PremiumLoader";
 
 function DeleteContestList() {
   const [loading, setLoading] = useState(true);
@@ -89,6 +90,11 @@ function DeleteContestList() {
     }).format(date);
   };
 
+  if (loading) 
+  {
+      return <PremiumLoader />
+  }
+
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 font-sans text-white h-full flex flex-col animate-in fade-in duration-500 pb-20 relative">
       {/* Header section */}
@@ -118,11 +124,6 @@ function DeleteContestList() {
 
       {/* Data Table */}
       <div className="bg-[#111] border border-white/5 rounded-2xl flex flex-col shadow-lg overflow-hidden flex-1 relative z-10">
-        {loading ? (
-          <div className="flex-1 flex items-center justify-center min-h-[400px]">
-            <span className="loading loading-spinner loading-lg text-[#C9963A]"></span>
-          </div>
-        ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -196,7 +197,6 @@ function DeleteContestList() {
               </tbody>
             </table>
           </div>
-        )}
 
         {/* Pagination */}
         <div className="border-t border-white/5 bg-[#0a0a0a] p-4 flex items-center justify-between">

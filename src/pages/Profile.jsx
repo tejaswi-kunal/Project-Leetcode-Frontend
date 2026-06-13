@@ -6,6 +6,7 @@ import axiosClient from "../utils/axiosClient";
 import { X, Activity, TrendingUp, ChevronLeft, ChevronRight, Code2, Clock, Cpu } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { motion } from 'framer-motion';
+import PremiumLoader from "../components/PremiumLoader";
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -207,8 +208,9 @@ function Profile() {
         ];
     }, [userData]);
 
-    if (loading) {
-        return <div className="min-h-screen bg-zinc-950 flex items-center justify-center"><span className="loading loading-spinner loading-lg text-[#C9963A]"></span></div>;
+    if (loading) 
+    {
+        return <PremiumLoader />;
     }
 
     return (

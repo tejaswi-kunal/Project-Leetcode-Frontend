@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import axiosClient from "../utils/axiosClient";
 import { useNavigate, useParams } from "react-router";
+import PremiumLoader from "../components/PremiumLoader";
 import {
     Save, Plus, Trash2, Calendar, FileText, AlertCircle, 
     CheckCircle2, Loader2, Trophy, Search, X, Activity, Clock, Edit3
@@ -178,12 +179,7 @@ function EditContest() {
     };
 
     if (isPageLoading) {
-        return (
-            <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-4">
-                <span className="loading loading-spinner loading-lg text-blue-500"></span>
-                <p className="text-zinc-400 font-medium">Loading contest data...</p>
-            </div>
-        );
+        return <PremiumLoader />
     }
 
     return (

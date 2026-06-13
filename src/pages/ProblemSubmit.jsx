@@ -4,6 +4,7 @@ import axiosClient from "../utils/axiosClient";
 import Header from "../components/Header";
 import LeftWorkspace from "../components/LeftWorkspace";
 import RightWorkspace from "../components/RightWorkspace";
+import PremiumLoader from "../components/PremiumLoader";
 
 const LANGUAGES = [
     { id: "cpp", name: "C++" },
@@ -165,7 +166,10 @@ function ProblemSubmit() {
         }
     };
 
-    if (loadingProblem) return <div className="min-h-screen bg-[#080808] flex items-center justify-center"><span className="loading loading-spinner loading-lg text-[#C9963A]"></span></div>;
+    if (loadingProblem)
+    { 
+        return <PremiumLoader />
+    }
     if (!problem) return <div className="min-h-screen bg-[#080808] flex flex-col items-center justify-center text-white"><h2 className="text-2xl font-bold text-red-400 mb-2">Problem Not Found</h2><button onClick={() => navigate('/problems')} className="text-[#C9963A] hover:underline">Go back to problems</button></div>;
 
     return (

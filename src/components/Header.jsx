@@ -70,11 +70,81 @@ function Header() {
                     {/* Logo */}
                     <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
                         <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#C9963A] to-[#E0B455] flex items-center justify-center shadow-[0_0_15px_rgba(201,150,58,0.3)] group-hover:scale-105 transition-transform duration-300">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                            <svg 
+                                xmlns="http://www.w3.org/2000/svg" 
+                                viewBox="0 0 32 32" 
+                                className="w-10 h-10 shrink-0 drop-shadow-xl"
+                            >
+                                <defs>
+                                    {/* 1. Subtle inner background glow */}
+                                    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+                                        <stop offset="0%" stopColor="#C9963A" stopOpacity="0.25" />
+                                        <stop offset="100%" stopColor="#C9963A" stopOpacity="0" />
+                                    </radialGradient>
+
+                                    {/* 2. Sleek, angled glass edge border */}
+                                    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stopColor="#C9963A" stopOpacity="0.9" />
+                                        <stop offset="40%" stopColor="#ffffff" stopOpacity="0.05" />
+                                        <stop offset="100%" stopColor="#C9963A" stopOpacity="0.4" />
+                                    </linearGradient>
+
+                                    {/* 3. Ultra-vibrant Gold for the Slash */}
+                                    <linearGradient id="slashGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                                        <stop offset="0%" stopColor="#B8860B" />
+                                        <stop offset="50%" stopColor="#FDE047" /> {/* Bright flash in the middle */}
+                                        <stop offset="100%" stopColor="#C9963A" />
+                                    </linearGradient>
+
+                                    {/* 4. Soft bloom filter for the gold slash */}
+                                    <filter id="slashGlow" x="-20%" y="-20%" width="140%" height="140%">
+                                        <feGaussianBlur stdDeviation="1" result="blur" />
+                                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                    </filter>
+                                </defs>
+
+                                {/* Base Dark Container */}
+                                <rect x="2" y="2" width="28" height="28" rx="8" fill="#0A0A0A" />
+                                
+                                {/* Inner Radial Glow */}
+                                <rect x="2" y="2" width="28" height="28" rx="8" fill="url(#bgGlow)" />
+                                
+                                {/* Gradient Rim/Border */}
+                                <rect x="2" y="2" width="28" height="28" rx="8" fill="none" stroke="url(#borderGrad)" strokeWidth="1.2" />
+
+                                {/* Left Bracket (Crisp Platinum/White for contrast) */}
+                                <polyline 
+                                    points="12 10 7 16 12 22" 
+                                    fill="none" 
+                                    stroke="#F4F4F5" 
+                                    strokeWidth="2.5" 
+                                    strokeLinecap="round" 
+                                    strokeLinejoin="round" 
+                                />
+
+                                {/* Right Bracket (Crisp Platinum/White for contrast) */}
+                                <polyline 
+                                    points="20 10 25 16 20 22" 
+                                    fill="none" 
+                                    stroke="#F4F4F5" 
+                                    strokeWidth="2.5" 
+                                    strokeLinecap="round" 
+                                    strokeLinejoin="round" 
+                                />
+
+                                {/* Center Slash (Vibrant, Glowing Gold) */}
+                                <line 
+                                    x1="18" y1="7" 
+                                    x2="14" y2="25" 
+                                    fill="none" 
+                                    stroke="url(#slashGrad)" 
+                                    strokeWidth="3" 
+                                    strokeLinecap="round" 
+                                    filter="url(#slashGlow)" 
+                                />
                             </svg>
                         </div>
-                        <span className="text-white font-display font-bold text-sm tracking-widest uppercase">HackForge</span>
+                        <span className="text-white font-display font-bold text-sm tracking-widest">HackForge</span>
                     </div>
 
                     {/* Main Navigation */}

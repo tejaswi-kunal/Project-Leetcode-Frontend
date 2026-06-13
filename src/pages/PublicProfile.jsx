@@ -6,8 +6,8 @@ import ProfileSidebar from "../components/ProfileSidebar";
 import axiosClient from "../utils/axiosClient";
 import { Activity, Lock } from "lucide-react";
 import { motion } from 'framer-motion';
+import PremiumLoader from "../components/PremiumLoader";
 
-// --- Reusing the Upgraded Custom Heatmap ---
 const CustomHeatmap = ({ activityCalendar }) => {
     const [tooltip, setTooltip] = useState(null);
     const scrollContainerRef = useRef(null);
@@ -131,7 +131,10 @@ function PublicProfile() {
         if (id) fetchPublicData();
     }, [id]);
 
-    if (loading) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center"><span className="loading loading-spinner loading-lg text-[#C9963A]"></span></div>;
+    if (loading) 
+    {
+        return <PremiumLoader />
+    }
     
     if (error || !publicUser) {
         return (

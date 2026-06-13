@@ -5,6 +5,7 @@ import {
     FileCode2, Send, Users, Plus, 
     Trophy, Play, CheckCircle2, XCircle, Clock, ArrowRight
 } from "lucide-react";
+import PremiumLoader from "../components/PremiumLoader";
 
 function AdminDashboardOverview() {
     const [loading, setLoading] = useState(true);
@@ -42,12 +43,9 @@ function AdminDashboardOverview() {
         return Math.floor(seconds) + "s";
     };
 
-    if (loading) {
-        return (
-            <div className="h-full flex items-center justify-center min-h-[50vh]">
-                <span className="loading loading-spinner loading-lg text-[#C9963A]"></span>
-            </div>
-        );
+    if (loading)
+    {
+        return <PremiumLoader />
     }
 
     return (
